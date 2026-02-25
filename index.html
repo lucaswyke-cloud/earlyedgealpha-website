@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EarlyEdgeAlpha — See It Before The Market Does</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080808;
+    --deep: #0d0d0d;
+    --surface: #111111;
+    --border: rgba(255,255,255,0.07);
+    --gold: #C9A84C;
+    --gold-dim: rgba(201,168,76,0.15);
+    --gold-glow: rgba(201,168,76,0.06);
+    --white: #F0EDE6;
+    --muted: rgba(240,237,230,0.4);
+    --green: #4ADE80;
+    --orange: #FB923C;
+    --red: #F87171;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 48px;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.4s, background 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(8,8,8,0.92);
+    backdrop-filter: blur(20px);
+    border-color: var(--border);
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    color: var(--white);
+    text-transform: uppercase;
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-links {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.4);
+    padding: 10px 24px;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .nav-cta:hover {
+    background: var(--gold-dim);
+    border-color: var(--gold);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 800px 600px at 50% 40%, rgba(201,168,76,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 400px 400px at 20% 80%, rgba(74,222,128,0.03) 0%, transparent 60%),
+      radial-gradient(ellipse 600px 400px at 80% 20%, rgba(201,168,76,0.03) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--border), transparent);
+    pointer-events: none;
+  }
+  .hero-line:nth-child(1) { left: 25%; }
+  .hero-line:nth-child(2) { left: 50%; }
+  .hero-line:nth-child(3) { left: 75%; }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 8px 18px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .hero-logo-wrap {
+    margin-bottom: 12px;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+  .hero-logo {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 40px rgba(201,168,76,0.25));
+  }
+  .hero-tagline-be {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(13px, 1.8vw, 18px);
+    font-weight: 300;
+    letter-spacing: 0.55em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.45s forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(52px, 8vw, 96px);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.6s forwards;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto 56px;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.75s forwards;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.9s forwards;
+  }
+
+  .btn-primary {
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--gold);
+    padding: 16px 40px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s, transform 0.2s;
+    display: inline-block;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-ghost {
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-ghost:hover { color: var(--white); }
+  .btn-ghost::after { content: '↓'; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TICKER STRIP ── */
+  .ticker-strip {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 0;
+    overflow: hidden;
+    position: relative;
+    background: var(--deep);
+  }
+  .ticker-track {
+    display: flex;
+    gap: 0;
+    animation: ticker 30s linear infinite;
+    width: max-content;
+  }
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 40px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    border-right: 1px solid var(--border);
+  }
+  .ticker-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .ticker-dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .ticker-dot.orange { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+  .ticker-dot.gold { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+  .ticker-val { color: var(--muted); }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ── SECTION BASE ── */
+  section { padding: 120px 48px; }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--gold);
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .section-title em { font-style: italic; color: var(--gold); }
+
+  /* ── FEATURES ── */
+  .features { background: var(--deep); }
+  .features-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .features-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: end;
+    margin-bottom: 80px;
+  }
+  .features-desc {
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.75;
+    padding-bottom: 4px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .feature-card {
+    background: var(--deep);
+    padding: 48px 40px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .feature-card:hover { background: #141414; }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-icon {
+    font-size: 24px;
+    margin-bottom: 24px;
+    display: block;
+  }
+  .feature-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+  }
+  .feature-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .feature-tag {
+    display: inline-block;
+    margin-top: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how { background: var(--black); }
+  .how-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .how-steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+    margin-top: 80px;
+  }
+  .steps-list { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 24px;
+    padding: 40px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .step:first-child { border-top: 1px solid var(--border); }
+  .step:hover .step-num { color: var(--gold); }
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 300;
+    color: rgba(240,237,230,0.12);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .step-content {}
+  .step-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 10px;
+  }
+  .step-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── MOCK UI ── */
+  .mock-ui {
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    position: sticky;
+    top: 120px;
+  }
+  .mock-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: #0d0d0d;
+  }
+  .mock-dots { display: flex; gap: 6px; }
+  .mock-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .mock-dot:nth-child(1) { background: #FF5F57; }
+  .mock-dot:nth-child(2) { background: #FEBC2E; }
+  .mock-dot:nth-child(3) { background: #28C840; }
+  .mock-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .mock-body { padding: 16px; }
+  .mock-col-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+  .mock-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+  }
+  .mock-row.green {
+    background: rgba(74,222,128,0.07);
+    border-color: rgba(74,222,128,0.3);
+    outline: 2px solid rgba(74,222,128,0.5);
+  }
+  .mock-row.orange {
+    background: rgba(251,146,60,0.07);
+    border-color: rgba(251,146,60,0.3);
+    outline: 2px solid rgba(251,146,60,0.5);
+  }
+  .mock-row.gold {
+    background: rgba(201,168,76,0.07);
+    border-color: rgba(201,168,76,0.3);
+    outline: 2px solid rgba(201,168,76,0.5);
+  }
+  .mock-row.dim {
+    background: rgba(255,255,255,0.02);
+    color: var(--muted);
+  }
+  .mock-row-left { display: flex; align-items: center; gap: 10px; }
+  .mock-ticker {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .mock-name { font-size: 12px; color: var(--muted); }
+  .mock-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+  }
+  .mock-badge.hot { background: rgba(74,222,128,0.2); color: var(--green); }
+  .mock-badge.warm { background: rgba(251,146,60,0.2); color: var(--orange); }
+  .mock-badge.auth { background: rgba(201,168,76,0.2); color: var(--gold); }
+  .mock-badge.tracked { background: rgba(255,255,255,0.08); color: var(--white); }
+  .mock-mc {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Tooltip mock */
+  .mock-tooltip {
+    background: rgba(13,13,13,0.97);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 12px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    line-height: 1.8;
+    color: var(--white);
+    margin: 12px 0 6px;
+    position: relative;
+  }
+  .mock-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 20px; right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  /* ── DEMO ── */
+  /* ── SIGNAL SPOTLIGHT ── */
+  .spotlight { background: var(--black); }
+  .spotlight-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .spotlight-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    margin-top: 64px;
+  }
+  .spotlight-copy h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 300;
+    line-height: 1.2;
+    margin-bottom: 20px;
+  }
+  .spotlight-copy h3 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+  .spotlight-copy p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+  .spotlight-points {
+    list-style: none;
+    padding: 0;
+    margin: 28px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .spotlight-points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .spotlight-points li::before {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+  .spotlight-points li strong {
+    color: var(--cream);
+    font-weight: 500;
+  }
+  .spotlight-img-wrap {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .spotlight-img-wrap::before {
+    content: 'LIVE SIGNAL';
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    background: rgba(0,0,0,0.75);
+    border: 1px solid rgba(212,175,55,0.3);
+    padding: 4px 10px;
+    z-index: 2;
+    border-radius: 1px;
+  }
+  .spotlight-img-wrap img {
+    width: 100%;
+    display: block;
+  }
+  .spotlight-caption {
+    padding: 14px 16px;
+    background: rgba(0,0,0,0.4);
+    border-top: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: rgba(240,237,230,0.4);
+    letter-spacing: 0.08em;
+  }
+  @media (max-width: 900px) {
+    .spotlight-grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  /* ── DEMO / STATS ── */
+  .demo { background: var(--deep); }
+  .demo-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    margin-top: 80px;
+  }
+  .demo-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 48px;
+  }
+  .stat-cell {
+    background: var(--deep);
+    padding: 32px;
+  }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .demo-visual {
+    position: relative;
+  }
+  .demo-screen {
+    background: #080808;
+    border: 1px solid var(--border);
+    padding: 24px;
+    position: relative;
+  }
+  .demo-screen::before {
+    content: 'FINAL STRETCH';
+    position: absolute;
+    top: -1px; left: 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    background: var(--deep);
+    padding: 4px 12px;
+    border: 1px solid rgba(201,168,76,0.3);
+    border-top: none;
+    transform: translateY(-100%);
+  }
+  .demo-rows { display: flex; flex-direction: column; gap: 8px; }
+
+  /* animated highlight */
+  .anim-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    border: 1px solid rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.02);
+    transition: all 1.2s ease;
+  }
+  .anim-row.will-highlight { animation: highlightPop 4s 1.5s ease forwards; }
+  .anim-row.will-highlight-2 { animation: highlightPop2 4s 2.8s ease forwards; }
+
+  @keyframes highlightPop {
+    0%   { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.04); outline: none; }
+    30%  { background: rgba(74,222,128,0.10); border-color: rgba(74,222,128,0.4); outline: 2px solid rgba(74,222,128,0.6); }
+    100% { background: rgba(74,222,128,0.07); border-color: rgba(74,222,128,0.3); outline: 2px solid rgba(74,222,128,0.4); }
+  }
+  @keyframes highlightPop2 {
+    0%   { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.04); outline: none; }
+    30%  { background: rgba(251,146,60,0.10); border-color: rgba(251,146,60,0.4); outline: 2px solid rgba(251,146,60,0.6); }
+    100% { background: rgba(251,146,60,0.07); border-color: rgba(251,146,60,0.3); outline: 2px solid rgba(251,146,60,0.4); }
+  }
+
+  /* ── WAITLIST ── */
+  .waitlist {
+    background: var(--black);
+    position: relative;
+    overflow: hidden;
+  }
+  .waitlist-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 1000px 600px at 50% 50%, rgba(201,168,76,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .waitlist-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+  }
+  .waitlist-inner .section-label { justify-content: center; }
+  .waitlist-inner .section-label::before { display: none; }
+  .waitlist-sub {
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1.7;
+    margin-bottom: 56px;
+  }
+  .waitlist-form {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+  }
+  .waitlist-form input {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-right: none;
+    color: var(--white);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 15px;
+    padding: 18px 24px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .waitlist-form input::placeholder { color: rgba(240,237,230,0.25); }
+  .waitlist-form input:focus { border-color: rgba(201,168,76,0.5); }
+  .waitlist-form button {
+    background: var(--gold);
+    color: var(--black);
+    border: none;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 18px 40px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .waitlist-form button:hover { opacity: 0.88; }
+  .waitlist-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* success state */
+  .waitlist-success {
+    display: none;
+    padding: 24px;
+    border: 1px solid rgba(201,168,76,0.3);
+    background: var(--gold-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    text-align: center;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--deep);
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .footer-logo span { color: var(--gold); }
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .footer-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+  .footer-links a {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--white); }
+
+
+  /* ── PRICING ── */
+  .pricing { background: var(--black); position: relative; overflow: hidden; }
+  .pricing-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 800px 500px at 50% 50%, rgba(201,168,76,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .pricing-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+  }
+  .pricing-inner .section-label { justify-content: center; }
+  .pricing-inner .section-label::before { display: none; }
+  .pricing-card {
+    border: 1px solid rgba(201,168,76,0.25);
+    padding: 56px 48px;
+    margin-top: 56px;
+    position: relative;
+    background: var(--surface);
+  }
+  .pricing-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 32px; right: 32px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .pricing-badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 5px 14px;
+    margin-bottom: 32px;
+  }
+  .pricing-amount {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(56px, 8vw, 80px);
+    font-weight: 300;
+    line-height: 1;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .pricing-amount span {
+    font-size: clamp(28px, 4vw, 36px);
+    color: var(--gold);
+    vertical-align: super;
+    font-weight: 300;
+  }
+  .pricing-period {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+  .pricing-divider {
+    width: 40px;
+    height: 1px;
+    background: var(--border);
+    margin: 0 auto 40px;
+  }
+  .pricing-desc {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.75;
+    margin-bottom: 40px;
+  }
+  .pricing-terms {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    opacity: 0.6;
+    margin-top: 24px;
+  }
+  .pricing-refund {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+    text-align: left;
+  }
+  .pricing-refund-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    color: var(--white);
+  }
+  .pricing-refund p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+  .pricing-support {
+    margin-top: 32px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    text-align: left;
+  }
+  .pricing-support-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    color: var(--white);
+  }
+  .pricing-support p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+  .pricing-support a {
+    color: var(--gold);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .pricing-support a:hover { opacity: 0.75; }
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+  .reveal-delay-5 { transition-delay: 0.5s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    section { padding: 80px 24px; }
+    .features-header { grid-template-columns: 1fr; gap: 24px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .how-steps { grid-template-columns: 1fr; gap: 40px; }
+    .mock-ui { display: none; }
+    .demo-grid { grid-template-columns: 1fr; gap: 48px; }
+    .waitlist-form { flex-direction: column; }
+    .waitlist-form input { border-right: 1px solid var(--border); border-bottom: none; }
+    footer { flex-direction: column; gap: 24px; text-align: center; }
+    .footer-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">Early<span>Edge</span>Alpha</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#demo">Performance</a></li>
+  </ul>
+  <a href="#waitlist" class="nav-cta">Request Access</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-line"></div>
+  <div class="hero-line"></div>
+  <div class="hero-line"></div>
+
+  <div class="hero-badge">Signal Layer — Axiom.trade</div>
+
+  <div class="hero-logo-wrap">
+    <img src="image-1.jpg" loading="lazy" alt="" class="hero-logo">
+  </div>
+
+  <div class="hero-tagline-be">Quantify The Edge</div>
+
+  <h1>
+    See It Before<br>    The Market <em>Does</em>
+  </h1>
+
+  <p class="hero-sub">
+    Real-time narrative velocity layered directly onto Axiom.<br>
+    Detect acceleration before price discovery begins.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#waitlist" class="btn-primary">Request Early Access</a>
+    <a href="#how" class="btn-ghost">See how it works</a>
+  </div>
+</section>
+
+<!-- TICKER STRIP -->
+<div class="ticker-strip">
+  <div class="ticker-track">
+    <!-- first set -->
+    <div class="ticker-item"><span class="ticker-dot green"></span><span>CUPID</span><span class="ticker-val">🟢 HOT — 8.2s avg</span></div>
+    <div class="ticker-item"><span class="ticker-dot orange"></span><span>KNIGHT</span><span class="ticker-val">🟠 WARMING — 24s avg</span></div>
+    <div class="ticker-item"><span class="ticker-dot gold"></span><span>SPOK</span><span class="ticker-val">🟨 AUTHORITY</span></div>
+    <div class="ticker-item"><span class="ticker-dot green"></span><span>RESTORE</span><span class="ticker-val">🟢 HOT — 11s avg ↑</span></div>
+    <div class="ticker-item"><span class="ticker-dot orange"></span><span>HDD</span><span class="ticker-val">🟠 WARMING — 31s avg</span></div>
+    <div class="ticker-item"><span class="ticker-dot green"></span><span>LUNA</span><span class="ticker-val">🟢 HOT — 6.7s avg ↑</span></div>
+    <div class="ticker-item"><span class="ticker-dot gold"></span><span>ELON</span><span class="ticker-val">🟨 AUTHORITY</span></div>
+    <div class="ticker-item"><span class="ticker-dot orange"></span><span>MEWING</span><span class="ticker-val">🟠 WARMING — 28s avg</span></div>
+    <!-- duplicate for infinite scroll -->
+    <div class="ticker-item"><span class="ticker-dot green"></span><span>CUPID</span><span class="ticker-val">🟢 HOT — 8.2s avg</span></div>
+    <div class="ticker-item"><span class="ticker-dot orange"></span><span>KNIGHT</span><span class="ticker-val">🟠 WARMING — 24s avg</span></div>
+    <div class="ticker-item"><span class="ticker-dot gold"></span><span>SPOK</span><span class="ticker-val">🟨 AUTHORITY</span></div>
+    <div class="ticker-item"><span class="ticker-dot green"></span><span>RESTORE</span><span class="ticker-val">🟢 HOT — 11s avg ↑</span></div>
+    <div class="ticker-item"><span class="ticker-dot orange"></span><span>HDD</span><span class="ticker-val">🟠 WARMING — 31s avg</span></div>
+    <div class="ticker-item"><span class="ticker-dot green"></span><span>LUNA</span><span class="ticker-val">🟢 HOT — 6.7s avg ↑</span></div>
+    <div class="ticker-item"><span class="ticker-dot gold"></span><span>ELON</span><span class="ticker-val">🟨 AUTHORITY</span></div>
+    <div class="ticker-item"><span class="ticker-dot orange"></span><span>MEWING</span><span class="ticker-val">🟠 WARMING — 28s avg</span></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="features-inner">
+    <div class="features-header">
+      <div>
+        <div class="section-label reveal">Intelligence Layer</div>
+        <h2 class="section-title reveal reveal-delay-1">Built for the<br><em>speed of narrative</em></h2>
+      </div>
+      <p class="features-desc reveal reveal-delay-2">
+        EarlyEdgeAlpha measures narrative velocity, authority triggers, and attention momentum in real time —
+        surfacing acceleration on Axiom before price discovery begins.
+      </p>
+    </div>
+
+    <div style="position: relative; text-align: center; margin-bottom: -1px;">
+      <span style="display: inline-block; font-family: 'Cormorant Garamond', serif; font-size: 13px; font-weight: 400; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); background: var(--deep); padding: 0 20px; position: relative; top: 0;">Features</span>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-name">Edge On/Off Toggle</div>
+        <p class="feature-desc">One click suspends all signal rendering. One click resumes. Zero latency, zero context switching.</p>
+        <span class="feature-tag">⚡ gold pill design</span>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <span class="feature-icon">📈</span>
+        <div class="feature-name">Trending Rank</div>
+        <p class="feature-desc">Rank ordinal exposed in every tooltip — '#1/300'. Top 10 signals high-conviction flow. Below 100 indicates early-stage narrative momentum.</p>
+        <span class="feature-tag">Live rank updates</span>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <span class="feature-icon">🟨</span>
+        <div class="feature-name">Authority Override</div>
+        <p class="feature-desc">Authority match triggers instant gold highlight — no velocity threshold. Pre-seeded with Elon Musk and Donald Trump. Catch high-signal tweets the moment they post.</p>
+        <span class="feature-tag">Custom authority list</span>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-icon">🎯</span>
+        <div class="feature-name">Hover Check</div>
+        <p class="feature-desc">Hover over any coin to trigger on-demand velocity measurement. Isolated tab preserves queue integrity.</p>
+        <span class="feature-tag">On-demand trigger</span>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <span class="feature-icon">🔍</span>
+        <div class="feature-name">Source Tracking</div>
+        <p class="feature-desc">Every signal tagged at source: HOVER (manual) or TREND (engine-captured, live rank). Manual seeds auto-promote on engine entry — no re-seeding required.</p>
+        <span class="feature-tag">Smart categorization</span>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <span class="feature-icon">📊</span>
+        <div class="feature-name">Rich Tooltips</div>
+        <p class="feature-desc">Full signal stack on hover: phrase, tweet gap, acceleration vector, sample depth, rank, source, data age. Everything in one glance.</p>
+        <span class="feature-tag">Live 2s refresh</span>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-icon">🌐</span>
+        <div class="feature-name">Narrative Seed Engine</div>
+        <p class="feature-desc">600 live narrative seeds monitored across global markets. Attention acceleration measured in real time.</p>
+        <span class="feature-tag">600+ seeds tracked</span>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <span class="feature-icon">👁</span>
+        <div class="feature-name">Tracked Badges</div>
+        <p class="feature-desc">101 curated handles monitored by default. Add, remove, or bulk-import your entire Twitter tracking list via the popup. Authority posts surface as inline TRACKED badges on Axiom — zero tab switching.</p>
+        <span class="feature-tag">101 tracked handles</span>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-name">Real-Time Velocity</div>
+        <p class="feature-desc">Inter-tweet interval measured per coin. Gap compression from 120s to sub-10s crosses threshold — coin highlights as narrative velocity accelerates.</p>
+        <span class="feature-tag">600+ trend phrases tracked</span>
+      </div>
+    </div>
+
+    <!-- POPUP SHOWCASE -->
+    <div class="popup-showcase reveal" style="margin-top: 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; border-top: 1px solid var(--border); padding-top: 80px;">
+      <div>
+        <div class="section-label" style="margin-bottom: 20px;">Extension Popup</div>
+        <h3 style="font-family: 'Cormorant Garamond', serif; font-size: clamp(28px, 3.5vw, 42px); font-weight: 300; line-height: 1.15; margin-bottom: 24px;">
+          Your edge, <em style="font-style: italic; color: var(--gold);">your rules</em>
+        </h3>
+        <p style="font-size: 16px; color: var(--muted); line-height: 1.75; margin-bottom: 28px;">
+          The built-in popup puts full control in your hands. Add individual Twitter handles to your Authority or Tracked lists, or bulk-import your entire watchlist in one paste. Gold-badged authority accounts trigger highlights the moment they post — no velocity threshold required.
+        </p>
+        <p style="font-size: 14px; color: var(--muted); line-height: 1.7; opacity: 0.7;">
+          Your lists stay local to your browser. Nothing is sent to any server.
+        </p>
+      </div>
+      <div class="reveal reveal-delay-1" style="position: relative;">
+        <div style="position: absolute; inset: -1px; border: 1px solid rgba(201,168,76,0.2); pointer-events: none; z-index: 1;"></div>
+        <div style="position: absolute; top: -1px; left: 32px; right: 32px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent);"></div>
+        <img
+          src="image-2.png" loading="lazy"
+          alt="EarlyEdgeAlpha extension popup showing Authority and Tracked handle management"
+          style="display: block; width: 100%; max-width: 340px; margin: 0 auto; border: 1px solid var(--border); filter: drop-shadow(0 24px 48px rgba(0,0,0,0.6)) drop-shadow(0 0 40px rgba(201,168,76,0.06));"
+        >
+        <div style="margin-top: 16px; text-align: center; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);">
+          ✦ &nbsp; Live extension popup — 101 tracked · 2 authority
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="how-inner">
+    <div class="section-label reveal">Process</div>
+    <h2 class="section-title reveal reveal-delay-1">How it <em>works</em></h2>
+
+    <div class="how-steps">
+      <div class="steps-list">
+        <div class="step reveal">
+          <div class="step-num">01</div>
+          <div class="step-content">
+            <div class="step-title">Install on Chrome</div>
+            <p class="step-desc">One-click install. The extension runs entirely in the background — no account, no login, no data sent to any server. Everything stays in your browser.</p>
+          </div>
+        </div>
+        <div class="step reveal reveal-delay-1">
+          <div class="step-num">02</div>
+          <div class="step-content">
+            <div class="step-title">Open Axiom Pulse</div>
+            <p class="step-desc">Navigate to axiom.trade/pulse. The extension activates automatically and begins feeding from our proprietary Trend Seed Engine, opening dedicated X search tabs to measure tweet velocity.</p>
+          </div>
+        </div>
+        <div class="step reveal reveal-delay-2">
+          <div class="step-num">03</div>
+          <div class="step-content">
+            <div class="step-title">Watch the Highlights Appear</div>
+            <p class="step-desc">Coins matching trending narratives light up green (hot), orange (warming), or red (early). Gold for authority. Highlights update live as velocity changes.</p>
+          </div>
+        </div>
+        <div class="step reveal reveal-delay-3">
+          <div class="step-num">04</div>
+          <div class="step-content">
+            <div class="step-title">Hover for Full Intel</div>
+            <p class="step-desc">Mouse over any highlighted coin to see the full velocity breakdown — matched phrase, tweet gap, acceleration direction, sample count, and how fresh the data is.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mock UI -->
+      <div class="mock-ui reveal reveal-delay-2">
+        <div class="mock-header">
+          <div class="mock-dots">
+            <div class="mock-dot"></div>
+            <div class="mock-dot"></div>
+            <div class="mock-dot"></div>
+          </div>
+          <div class="mock-title">axiom.trade/pulse — Final Stretch</div>
+          <div></div>
+        </div>
+        <div class="mock-body">
+          <div class="mock-col-label">Final Stretch</div>
+
+          <div class="mock-row green">
+            <div class="mock-row-left">
+              <span class="mock-ticker">CUPID</span>
+              <span class="mock-name">Cupid</span>
+              <span class="mock-badge hot">HOT</span>
+            </div>
+            <span class="mock-mc">$34K MC</span>
+          </div>
+
+          <div class="mock-tooltip">
+            🔍 cupid<br>
+            🟢 HOT<br>
+            ⏱ 8.2s avg gap<br>
+            🔼 accelerating<br>
+            📊 24 tweets sampled<br>
+            🕐 data: 12s ago
+          </div>
+
+          <div class="mock-row orange">
+            <div class="mock-row-left">
+              <span class="mock-ticker">KNIGHT</span>
+              <span class="mock-name">Tiny Knight</span>
+              <span class="mock-badge warm">WARMING</span>
+            </div>
+            <span class="mock-mc">$12K MC</span>
+          </div>
+
+          <div class="mock-row gold">
+            <div class="mock-row-left">
+              <span class="mock-ticker">SPOK</span>
+              <span class="mock-name">SpaceX Grok</span>
+              <span class="mock-badge auth">AUTHORITY</span>
+            </div>
+            <span class="mock-mc">$58K MC</span>
+          </div>
+
+          <div class="mock-row dim">
+            <div class="mock-row-left">
+              <span class="mock-ticker">HDD</span>
+              <span class="mock-name">Hard Disk Drive</span>
+            </div>
+            <span class="mock-mc">$4.7K MC</span>
+          </div>
+
+          <div class="mock-row dim">
+            <div class="mock-row-left">
+              <span class="mock-ticker">CHUL</span>
+              <span class="mock-name">Chulawd</span>
+              <span class="mock-badge tracked">TRACKED</span>
+            </div>
+            <span class="mock-mc">$9.4K MC</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SIGNAL SPOTLIGHT -->
+<section class="spotlight" style="padding: 100px 48px;">
+  <div class="spotlight-inner">
+    <div class="section-label reveal">In The Wild</div>
+    <h2 class="section-title reveal reveal-delay-1">What the signal <em>looks like</em></h2>
+    <div class="spotlight-grid">
+      <div class="spotlight-copy reveal reveal-delay-1">
+        <h3>Every coin tells you<br>exactly <em>where it stands</em></h3>
+        <p>Hover any highlighted coin and EarlyEdgeAlpha surfaces the full intelligence layer — not just a colour, but the precise data behind it. Source, strength, freshness, trajectory.</p>
+        <p>In the screenshot, <strong style="color:var(--cream)">Earendel</strong> is flagged <strong style="color:var(--gold)">HOT</strong> via a manual hover trigger, with 6 tweets sampled at a 25.8s average gap and data just 16 seconds old — a real edge, in real time.</p>
+        <ul class="spotlight-points">
+          <li><strong>Source:</strong> HOVER or TREND — so you always know whether you triggered the measurement or the engine found it autonomously.</li>
+          <li><strong>Tweet gap:</strong> The average time between posts. Compression is the signal — the tighter the gap, the hotter the narrative.</li>
+          <li><strong>Freshness:</strong> Data age shown in seconds. Stale data costs you entries. EarlyEdgeAlpha keeps each tracked coin rechecked and current.</li>
+          <li><strong>Continuous coverage:</strong> New pairs and coins in their final stretch of bonding receive automatic rechecks — so every coin stays as informed and fresh as possible, page by page.</li>
+        </ul>
+      </div>
+      <div class="spotlight-img-wrap reveal reveal-delay-2">
+        <img src="image-3.webp" loading="lazy" alt="EarlyEdgeAlpha live signal tooltip on Axiom Pulse — showing HOT status, source, tweet velocity, and data freshness for Earendel" loading="lazy">
+        <div class="spotlight-caption">axiom.trade/pulse · EarlyEdgeAlpha overlay · live velocity tooltip</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- DEMO / STATS -->
+<section class="demo" id="demo">
+  <div class="demo-inner">
+    <div class="section-label reveal">Signal Quality</div>
+    <h2 class="section-title reveal reveal-delay-1">Numbers that <em>matter</em></h2>
+
+    <div class="demo-grid">
+      <div>
+        <p class="features-desc reveal reveal-delay-2" style="margin-bottom:0">
+          EarlyEdgeAlpha doesn't guess — it measures. Tweet velocity is one of the most consistent leading signals of short-term price movement in narrative-driven markets. Every coin that matters stays rechecked and current.
+        </p>
+        <div class="demo-stats reveal reveal-delay-3">
+          <div class="stat-cell">
+            <div class="stat-num">600+</div>
+            <div class="stat-label">Trend phrases tracked by our Seed Engine</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-num">✓</div>
+            <div class="stat-label">New pairs &amp; Final Stretch rechecks</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-num">101</div>
+            <div class="stat-label">High-signal handles monitored</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-num">4</div>
+            <div class="stat-label">Dedicated X tabs — zero interference</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-visual reveal reveal-delay-2">
+        <div class="demo-screen">
+          <div class="demo-rows">
+            <div class="anim-row">
+              <div class="mock-row-left">
+                <span class="mock-ticker" style="font-family:'DM Mono',monospace;font-size:12px">LUNA</span>
+                <span class="mock-name">Luna Classic</span>
+              </div>
+              <span class="mock-mc">$2.1K MC</span>
+            </div>
+            <div class="anim-row will-highlight">
+              <div class="mock-row-left">
+                <span class="mock-ticker" style="font-family:'DM Mono',monospace;font-size:12px">RESTORE</span>
+                <span class="mock-name">Restore Britain</span>
+              </div>
+              <span class="mock-mc">$8.4K MC</span>
+            </div>
+            <div class="anim-row">
+              <div class="mock-row-left">
+                <span class="mock-ticker" style="font-family:'DM Mono',monospace;font-size:12px">KAZOO</span>
+                <span class="mock-name">Kazoo</span>
+              </div>
+              <span class="mock-mc">$1.7K MC</span>
+            </div>
+            <div class="anim-row will-highlight-2">
+              <div class="mock-row-left">
+                <span class="mock-ticker" style="font-family:'DM Mono',monospace;font-size:12px">NIBS</span>
+                <span class="mock-name">Nibs</span>
+              </div>
+              <span class="mock-mc">$3.2K MC</span>
+            </div>
+            <div class="anim-row">
+              <div class="mock-row-left">
+                <span class="mock-ticker" style="font-family:'DM Mono',monospace;font-size:12px">ET</span>
+                <span class="mock-name">Early Timing</span>
+              </div>
+              <span class="mock-mc">$5.9K MC</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="pricing-bg"></div>
+  <div class="pricing-inner">
+    <div class="section-label reveal">Beta Access</div>
+    <h2 class="section-title reveal reveal-delay-1">Simple, <em>transparent</em> pricing</h2>
+
+    <div class="pricing-card reveal reveal-delay-2">
+      <div class="pricing-badge">EarlyEdgeAlpha — Beta</div>
+      <div class="pricing-amount"><span>£</span>20</div>
+      <div class="pricing-period">per month</div>
+      <div class="pricing-divider"></div>
+      <p class="pricing-desc">
+        Full access to the Signal Layer, Trend Seed Engine, Authority Overrides, and real-time narrative velocity intelligence — everything running live in your browser.
+      </p>
+      <a href="#waitlist" class="btn-primary">Request Early Access</a>
+      <p class="pricing-terms">Cancel anytime. No contracts. No hidden fees.</p>
+
+      <div class="pricing-refund">
+        <div class="pricing-refund-title">Refund Policy</div>
+        <p>We do not offer refunds for prior billing periods. You may cancel your subscription at any time and retain full access through the end of your paid term.</p>
+      </div>
+
+      <div class="pricing-support">
+        <div class="pricing-support-title">Support</div>
+        <p>For support inquiries, contact <a href="/cdn-cgi/l/email-protection#d5b0b4a7b9acb0b1b2b0b4b9a5bdb495b2b8b4bcb9fbb6bab8"><span class="__cf_email__" data-cfemail="395c584b55405c5d5e5c5855495158795e54585055175a5654">[email&#160;protected]</span></a>. We aim to respond within 24–48 hours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section class="waitlist" id="waitlist">
+  <div class="waitlist-bg"></div>
+  <div class="waitlist-inner">
+    <div class="section-label reveal">Early Access</div>
+    <h2 class="section-title reveal reveal-delay-1">Join the <em>waitlist</em></h2>
+    <p class="waitlist-sub reveal reveal-delay-2">
+
+    </p>
+    <div class="reveal reveal-delay-3">
+      <form class="waitlist-form" id="waitlistForm">
+        <input type="email" placeholder="Your email address" required id="waitlistEmail">
+        <button type="submit">Request Access</button>
+      </form>
+      <div class="waitlist-success" id="waitlistSuccess">
+        ✦ &nbsp; ✦ &nbsp; You're on the list. We'll be in touch.
+      </div>
+      <p class="waitlist-note">No spam. Invite sent when a slot opens.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Early<span>Edge</span>Alpha</div>
+  <p class="footer-copy">© 2026 EarlyEdgeAlpha. All rights reserved.</p>
+  <ul class="footer-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li><li><a href="#waitlist">Access</a></li>
+    <li><a href="terms.html">Terms</a></li>
+    <li><a href="privacy.html">Privacy</a></li>
+  </ul>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Nav scroll effect
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+  reveals.forEach(el => observer.observe(el));
+
+  // Fallback: reveal all after 3s in case observer fails (mobile Safari)
+  setTimeout(() => {
+    reveals.forEach(el => el.classList.add('visible'));
+  }, 3000);
+
+  // Waitlist form
+  const form = document.getElementById('waitlistForm');
+  const success = document.getElementById('waitlistSuccess');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    form.style.display = 'none';
+    success.style.display = 'block';
+  });
+
+  // Replay demo animation on scroll into view
+  const demoRows = document.querySelectorAll('.anim-row');
+  const demoObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        demoRows.forEach(r => {
+          r.style.animation = 'none';
+          r.offsetHeight;
+          r.style.

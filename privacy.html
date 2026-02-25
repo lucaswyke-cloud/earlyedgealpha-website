@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — EarlyEdgeAlpha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080808;
+    --deep: #0d0d0d;
+    --surface: #111111;
+    --border: rgba(255,255,255,0.07);
+    --gold: #C9A84C;
+    --white: #F0EDE6;
+    --muted: rgba(240,237,230,0.4);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 48px;
+    background: rgba(8,8,8,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    color: var(--white);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-back {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--white); }
+
+  .legal-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 140px 48px 100px;
+  }
+
+  .legal-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .legal-label::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--gold);
+  }
+
+  .legal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .legal-title em { font-style: italic; color: var(--gold); }
+
+  .legal-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 64px;
+  }
+
+  .legal-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+  }
+
+  .legal-section { margin-bottom: 48px; }
+
+  .legal-section h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    margin-bottom: 16px;
+    color: var(--white);
+  }
+
+  .legal-section h2 .num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .legal-section p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+
+  .legal-section ul {
+    list-style: none;
+    margin-top: 8px;
+  }
+  .legal-section ul li {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.8;
+    padding-left: 20px;
+    position: relative;
+    margin-bottom: 6px;
+  }
+  .legal-section ul li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-size: 12px;
+  }
+
+  .legal-section a {
+    color: var(--gold);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .legal-section a:hover { opacity: 0.75; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--deep);
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .footer-logo span { color: var(--gold); }
+  .footer-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+  .footer-links a {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--white); }
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    opacity: 0.5;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 20px 24px; }
+    .legal-wrap { padding: 120px 24px 80px; }
+    footer { flex-direction: column; gap: 20px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Early<span>Edge</span>Alpha</a>
+  <a href="index.html" class="nav-back">← Back to Site</a>
+</nav>
+
+<div class="legal-wrap">
+
+  <div class="legal-label">Legal</div>
+  <h1 class="legal-title">Privacy <em>Policy</em></h1>
+  <p class="legal-date">Effective: 2026 · EarlyEdgeAlpha</p>
+
+  <div class="legal-section">
+    <h2><span class="num">01</span>Overview</h2>
+    <p>This Privacy Policy explains how EarlyEdgeAlpha handles information in connection with your use of the Service.</p>
+    <p>We are committed to minimal data collection and transparent practices.</p>
+  </div>
+
+  <div class="legal-divider"></div>
+
+  <div class="legal-section">
+    <h2><span class="num">02</span>Data Collection</h2>
+    <p>EarlyEdgeAlpha is designed with privacy as a default:</p>
+    <ul>
+      <li>We do not require account creation</li>
+      <li>We do not collect personal trading data</li>
+      <li>We do not store user portfolio information</li>
+      <li>We do not sell user data</li>
+    </ul>
+    <p style="margin-top: 16px;">Subscription billing is processed securely through Stripe. We do not store or have access to full payment details.</p>
+  </div>
+
+  <div class="legal-divider"></div>
+
+  <div class="legal-section">
+    <h2><span class="num">03</span>Browser-Based Operation</h2>
+    <p>The extension operates entirely within your local browser environment.</p>
+    <p>Signal calculations, velocity measurements, and coin highlighting all occur client-side. We do not maintain centralised user trading databases.</p>
+  </div>
+
+  <div class="legal-divider"></div>
+
+  <div class="legal-section">
+    <h2><span class="num">04</span>Payment Processing</h2>
+    <p>Payments are processed by Stripe. Stripe may collect personal and payment information in accordance with their own privacy policy.</p>
+    <p>We do not have access to full card details at any point.</p>
+  </div>
+
+  <div class="legal-divider"></div>
+
+  <div class="legal-section">
+    <h2><span class="num">05</span>Email Communication</h2>
+    <p>If you contact us via email, we may retain that correspondence solely for support purposes.</p>
+    <p>We do not sell, share, or distribute email information to third parties.</p>
+  </div>
+
+  <div class="legal-divider"></div>
+
+  <div class="legal-section">
+    <h2><span class="num">06</span>Data Security</h2>
+    <p>We take reasonable measures to protect any limited data processed through the Service.</p>
+    <p>However, no internet-based service can guarantee absolute security.</p>
+  </div>
+
+  <div class="legal-divider"></div>
+
+  <div class="legal-section">
+    <h2><span class="num">07</span>Third-Party Services</h2>
+    <p>The Service may interact with third-party platforms such as Axiom or X (formerly Twitter). We are not responsible for their privacy practices.</p>
+    <p>EarlyEdgeAlpha is not affiliated with Axiom or X.</p>
+  </div>
+
+  <div class="legal-divider"></div>
+
+  <div class="legal-section">
+    <h2><span class="num">08</span>Changes to This Policy</h2>
+    <p>We may update this Privacy Policy periodically. Continued use of the Service constitutes acceptance of any updates.</p>
+  </div>
+
+  <div class="legal-divider"></div>
+
+  <div class="legal-section">
+    <h2><span class="num">09</span>Contact</h2>
+    <p>For privacy-related inquiries: <a href="/cdn-cgi/l/email-protection#0d686c7f617468696a686c617d656c4d6a606c6461236e6260"><span class="__cf_email__" data-cfemail="6d080c1f011408090a080c011d050c2d0a000c0401430e0200">[email&#160;protected]</span></a></p>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-logo">Early<span>Edge</span>Alpha</div>
+  <p class="footer-copy">EarlyEdgeAlpha provides analytical tools and does not provide financial advice.</p>
+  <ul class="footer-links">
+    <li><a href="index.ht
